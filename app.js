@@ -520,6 +520,7 @@ function renderHome() {
 
   const dailyHabits = GOOD_HABITS.filter(h => h.type === 'daily');
   const doneCount   = dailyHabits.filter(h => todayLog?.habits?.[h.id]).length;
+  const totalMiles  = getTotalLoggedMiles();
 
   const isSun = isSundayDS(todayDS());
 
@@ -547,6 +548,10 @@ function renderHome() {
         </div>
       </div>
       <p class="countdown-sub">Training week ${wInfo.weekNum} of ${wInfo.total}</p>
+      <div class="countdown-miles">
+        <span class="countdown-miles-num">${totalMiles}</span>
+        <span class="countdown-miles-label">miles logged in training</span>
+      </div>
     </div>
 
     <div class="card ${todayDone ? 'card-success' : ''}">
