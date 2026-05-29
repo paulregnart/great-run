@@ -1155,11 +1155,29 @@ function renderStats() {
 
   const dailyGood = GOOD_HABITS.filter(h => h.type === 'daily');
   const weeklyGood = GOOD_HABITS.filter(h => h.type === 'weekly' || h.type === 'optional');
+  const totalMiles = getTotalLoggedMiles();
+  const pb = getLongRunPB();
 
   let html = `
     <div class="stats-header">
       <div class="header-row">
         <h1 class="app-title">Stats</h1>
+      </div>
+    </div>
+
+    <div class="card card-navy">
+      <div class="section-title" style="margin-bottom:12px">Training miles</div>
+      <div class="stats-miles-row">
+        <div class="stats-miles-stat">
+          <div class="stats-miles-num">${totalMiles}</div>
+          <div class="stats-miles-label">total miles logged</div>
+        </div>
+        ${pb > 0 ? `
+        <div class="stats-miles-divider"></div>
+        <div class="stats-miles-stat">
+          <div class="stats-miles-num">${pb}</div>
+          <div class="stats-miles-label">longest run (PB)</div>
+        </div>` : ''}
       </div>
     </div>
 
