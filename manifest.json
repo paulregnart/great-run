@@ -1,0 +1,18 @@
+{
+  "name": "Great North Run Countdown",
+  "short_name": "GNR 2026",
+  "description": "Training tracker and countdown for the Great North Run 2026",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#C8102E",
+  "theme_color": "#C8102E",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

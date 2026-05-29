@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GNR 2026">
+  <meta name="theme-color" content="#C8102E">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <title>Great North Run 2026</title>
+</head>
+<body>
+
+<!-- ========== PIN SCREEN ========== -->
+<div id="pin-screen" class="overlay-screen">
+  <div class="pin-container">
+    <div class="pin-logo">
+      <div class="pin-logo-mark">GNR</div>
+      <h1>Great North Run</h1>
+      <p class="pin-race-date">13 September 2026</p>
+    </div>
+
+    <div id="pin-setup-section">
+      <h2>Set your PIN</h2>
+      <p class="pin-desc">Choose a 4-digit PIN to lock your data.<br>
+        <span class="pin-warning">This is a casual lock, not real security.</span>
+      </p>
+      <div class="pin-dots" id="pin-dots-setup">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+      <div class="pin-pad" id="pin-pad-setup"></div>
+    </div>
+
+    <div id="pin-confirm-section" class="hidden">
+      <h2>Confirm PIN</h2>
+      <p class="pin-desc">Enter your PIN again to confirm.</p>
+      <div class="pin-dots" id="pin-dots-confirm">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+      <div class="pin-pad" id="pin-pad-confirm"></div>
+    </div>
+
+    <div id="pin-entry-section" class="hidden">
+      <h2>Welcome back</h2>
+      <div class="pin-dots" id="pin-dots-entry">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+      <div id="pin-error" class="pin-error hidden">Incorrect PIN. Try again.</div>
+      <div class="pin-pad" id="pin-pad-entry"></div>
+      <button class="text-btn danger-text" onclick="confirmResetAll()">Reset everything</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ONBOARDING SCREEN ========== -->
+<div id="onboard-screen" class="overlay-screen hidden">
+  <div class="onboard-container">
+    <div class="onboard-header">
+      <div class="onboard-logo-mark">GNR</div>
+      <h1>Let's build your plan</h1>
+      <p>Two quick questions so we can build a training schedule starting from where you are right now.</p>
+    </div>
+
+    <div id="onboard-step-1" class="onboard-step">
+      <div class="form-group">
+        <label class="form-label">What's your current comfortable longest run?</label>
+        <div class="distance-input-row">
+          <input type="number" id="ob-longest-run" min="0.5" max="13" step="0.5" value="5" class="big-number-input">
+          <span class="input-unit">miles</span>
+        </div>
+        <p class="hint">The training plan builds from this distance up to race day.</p>
+      </div>
+      <button class="btn-primary full-width" onclick="onboardNext(1)">Next</button>
+    </div>
+
+    <div id="onboard-step-2" class="onboard-step hidden">
+      <div class="form-group">
+        <label class="form-label">How many days a week do you currently run?</label>
+        <div class="days-selector" id="ob-days-selector">
+          <button class="day-btn" data-val="1">1</button>
+          <button class="day-btn" data-val="2">2</button>
+          <button class="day-btn selected" data-val="3">3</button>
+          <button class="day-btn" data-val="4">4</button>
+          <button class="day-btn" data-val="5">5</button>
+          <button class="day-btn" data-val="6">6</button>
+          <button class="day-btn" data-val="7">7</button>
+        </div>
+      </div>
+      <button class="btn-primary full-width" onclick="onboardNext(2)">Start Training</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MAIN APP ========== -->
+<div id="app" class="hidden">
+
+  <!-- Nudge banner -->
+  <div id="nudge-banner" class="nudge-banner hidden">
+    <span class="nudge-icon">!</span>
+    <span id="nudge-text" class="nudge-text"></span>
+    <button onclick="dismissNudge()" class="nudge-dismiss">x</button>
+  </div>
+
+  <!-- Main content area -->
+  <main id="main-content">
+
+    <!-- HOME TAB -->
+    <section id="view-home" class="view active">
+      <div class="view-scroll">
+        <div class="view-content" id="home-content"></div>
+      </div>
+    </section>
+
+    <!-- TODAY TAB -->
+    <section id="view-today" class="view">
+      <div class="view-scroll">
+        <div class="view-content" id="today-content"></div>
+      </div>
+    </section>
+
+    <!-- PLAN TAB -->
+    <section id="view-plan" class="view">
+      <div class="view-scroll">
+        <div class="view-content" id="plan-content"></div>
+      </div>
+    </section>
+
+    <!-- ROUTE TAB -->
+    <section id="view-route" class="view">
+      <div class="view-scroll">
+        <div class="view-content" id="route-content"></div>
+      </div>
+    </section>
+
+    <!-- STATS TAB -->
+    <section id="view-stats" class="view">
+      <div class="view-scroll">
+        <div class="view-content" id="stats-content"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom navigation -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" data-view="home" onclick="showView('home')">
+      <span class="nav-icon">&#8962;</span>
+      <span class="nav-label">Home</span>
+    </button>
+    <button class="nav-btn" data-view="today" onclick="showView('today')">
+      <span class="nav-icon nav-check">&#10003;</span>
+      <span class="nav-label">Today</span>
+    </button>
+    <button class="nav-btn" data-view="plan" onclick="showView('plan')">
+      <span class="nav-icon">&#128197;</span>
+      <span class="nav-label">Plan</span>
+    </button>
+    <button class="nav-btn" data-view="route" onclick="showView('route')">
+      <span class="nav-icon">&#9872;</span>
+      <span class="nav-label">Route</span>
+    </button>
+    <button class="nav-btn" data-view="stats" onclick="showView('stats')">
+      <span class="nav-icon">&#128202;</span>
+      <span class="nav-label">Stats</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ========== MODALS ========== -->
+
+<!-- Completion modal -->
+<div id="completion-modal" class="modal-overlay hidden" onclick="closeCompletion(event)">
+  <div class="completion-card" onclick="event.stopPropagation()">
+    <div class="ring-wrapper">
+      <svg class="ring-svg" viewBox="0 0 120 120">
+        <circle class="ring-track" cx="60" cy="60" r="50"/>
+        <circle class="ring-fill" id="ring-fill-el" cx="60" cy="60" r="50"
+          stroke-dasharray="314" stroke-dashoffset="314"/>
+      </svg>
+      <div class="ring-runner">&#127939;</div>
+    </div>
+    <h2 id="completion-title" class="completion-title">Day Complete!</h2>
+    <p id="completion-msg" class="completion-msg"></p>
+    <button class="btn-primary" onclick="closeCompletion()">Keep going</button>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div id="settings-modal" class="modal-overlay hidden" onclick="closeSettings(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Settings</h2>
+      <button onclick="closeSettings()" class="icon-btn">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Longest comfortable run (miles)</label>
+        <div class="distance-input-row">
+          <input type="number" id="settings-longest-run" min="0.5" max="13" step="0.5" class="big-number-input">
+          <span class="input-unit">miles</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Days per week you run</label>
+        <div class="days-selector" id="settings-days-selector">
+          <button class="day-btn" data-val="1">1</button>
+          <button class="day-btn" data-val="2">2</button>
+          <button class="day-btn" data-val="3">3</button>
+          <button class="day-btn" data-val="4">4</button>
+          <button class="day-btn" data-val="5">5</button>
+          <button class="day-btn" data-val="6">6</button>
+          <button class="day-btn" data-val="7">7</button>
+        </div>
+      </div>
+      <button class="btn-primary full-width" onclick="saveSettings()">Save changes</button>
+      <div class="settings-divider"></div>
+      <button class="btn-danger full-width" onclick="confirmResetAll()">Reset everything</button>
+      <p class="hint center">This will erase all data and PIN.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Recap modal -->
+<div id="recap-modal" class="modal-overlay hidden" onclick="closeRecap(event)">
+  <div class="modal-card wide" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Weekly Recap</h2>
+      <button onclick="closeRecap()" class="icon-btn">&#10005;</button>
+    </div>
+    <div class="modal-body" id="recap-content"></div>
+  </div>
+</div>
+
+<!-- Freeze notification -->
+<div id="freeze-toast" class="toast hidden">
+  <span class="toast-icon">&#10052;</span>
+  <span id="freeze-toast-msg"></span>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
