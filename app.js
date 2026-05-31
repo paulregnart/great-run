@@ -197,14 +197,6 @@ function generatePlan(longestRun) {
   const totalWeeks = sundays.length;
   if (totalWeeks === 0) return { weeks: [], cantReachPeak: false };
 
-  // Last 3 training weeks before race: peak, taper1, taper2
-  // Then race day
-  const TAPER = [
-    { distance: 11.5, type: 'peak' },
-    { distance: 8.0,  type: 'taper' },
-    { distance: 5.0,  type: 'taper' },
-  ];
-
   const raceIdx = sundays.indexOf(RACE_DATE_STR);
   const lastTrainingIdx = raceIdx >= 0 ? raceIdx - 1 : totalWeeks - 1;
   const buildCount = Math.max(0, lastTrainingIdx - 2); // 3 taper weeks before race
@@ -233,7 +225,14 @@ function generatePlan(longestRun) {
     current = dist;
   }
 
-  // Taper phase
+  // Taper phase - scale off whatever peak the build phase actually reached
+  const actualPeak = Math.min(current, PEAK_DISTANCE);
+  const TAPER = [
+    { distance: actualPeak,                                         type: 'peak'  },
+    { distance: Math.round(actualPeak * 0.70 * 2) / 2,             type: 'taper' },
+    { distance: Math.max(Math.round(actualPeak * 0.50 * 2) / 2, 3), type: 'taper' },
+  ];
+
   TAPER.forEach((t, ti) => {
     const si = buildCount + ti;
     if (si <= lastTrainingIdx) {
