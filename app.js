@@ -7,7 +7,7 @@
 const RACE_DATE_STR = '2026-09-13';
 const RACE_DATE = new Date(RACE_DATE_STR + 'T09:00:00');
 const GNR_DISTANCE = 13.1;
-const PEAK_DISTANCE = 11.5;
+const PEAK_DISTANCE = 10;
 const NS = 'gnr_';
 
 const KEYS = {
@@ -123,46 +123,28 @@ function generatePlan(longestRun) {
 
   const raceIdx = sundays.indexOf(RACE_DATE_STR);
   const lastTrainingIdx = raceIdx >= 0 ? raceIdx - 1 : totalWeeks - 1;
-  const buildCount = Math.max(0, lastTrainingIdx - 2); // 3 taper weeks before race
+  // Reserve 1 week for the taper run before race
+  const buildCount = Math.max(0, lastTrainingIdx);
 
   const weeks = [];
   let current = longestRun;
-  let prevBuild = longestRun;
 
-  // Build phase
+  // Build phase: +1 mile per week up to peak, then hold
   for (let i = 0; i < buildCount; i++) {
     const weekNum = i + 1;
-    const isCutback = i > 0 && weekNum % 4 === 0;
-    let dist;
-
-    if (isCutback) {
-      dist = Math.round(prevBuild * 0.80 * 10) / 10;
-      dist = Math.max(dist, longestRun);
-    } else {
-      const inc = Math.min(current * 0.10, 1.5);
-      dist = Math.round((current + inc) * 10) / 10;
-      dist = Math.min(dist, PEAK_DISTANCE);
-    }
-
-    weeks.push({ sunday: sundays[i], weekNum, distance: dist, type: isCutback ? 'cutback' : 'build' });
-    if (!isCutback) prevBuild = dist;
+    const dist = current < PEAK_DISTANCE
+      ? Math.min(current + 1.0, PEAK_DISTANCE)
+      : PEAK_DISTANCE;
+    weeks.push({ sunday: sundays[i], weekNum, distance: dist, type: 'build' });
     current = dist;
   }
 
-  // Taper phase - scale off whatever peak the build phase actually reached
-  const actualPeak = Math.min(current, PEAK_DISTANCE);
-  const TAPER = [
-    { distance: actualPeak,                                         type: 'peak'  },
-    { distance: Math.round(actualPeak * 0.70 * 2) / 2,             type: 'taper' },
-    { distance: Math.max(Math.round(actualPeak * 0.50 * 2) / 2, 3), type: 'taper' },
-  ];
-
-  TAPER.forEach((t, ti) => {
-    const si = buildCount + ti;
-    if (si <= lastTrainingIdx) {
-      weeks.push({ sunday: sundays[si], weekNum: buildCount + ti + 1, distance: t.distance, type: t.type });
-    }
-  });
+  // One shorter taper run the week before the race
+  const taperIdx = buildCount;
+  if (taperIdx <= lastTrainingIdx) {
+    const taperDist = Math.max(Math.round(PEAK_DISTANCE * 0.55 * 2) / 2, 4);
+    weeks.push({ sunday: sundays[taperIdx], weekNum: buildCount + 1, distance: taperDist, type: 'taper' });
+  }
 
   // Race day
   if (raceIdx >= 0) {
@@ -171,9 +153,8 @@ function generatePlan(longestRun) {
 
   const buildDists = weeks.filter(w => w.type === 'build').map(w => w.distance);
   const maxReached = buildDists.length > 0 ? Math.max(...buildDists) : longestRun;
-  const cantReachPeak = maxReached < PEAK_DISTANCE - 1.0;
 
-  return { weeks, cantReachPeak, maxReached };
+  return { weeks, cantReachPeak: false, maxReached };
 }
 
 function getCurrentWeekPlan() {
@@ -928,16 +909,6 @@ function renderPlan() {
     </div>
   `;
 
-  if (cantReachPeak) {
-    html += `
-      <div class="plan-warning">
-        <strong>A note on your plan:</strong> Starting from ${setup.longestRun} miles,
-        there isn't quite enough time to reach 11.5 miles before the taper. The plan builds
-        you as high as is safe (${maxReached} mi peak). That's fine. Getting to the start
-        line healthy matters more than hitting an exact distance. Walk-run intervals on the day
-        are completely normal and respected.
-      </div>`;
-  }
 
   const loggedDistances = {};
   const logs = Store.getLogs();
