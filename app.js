@@ -524,12 +524,17 @@ function renderHome() {
 
   const isSun = isSundayDS(todayDS());
 
+  const startDate = parseDS(setup.startDate);
+  const dayNum = Math.floor((parseDS(todayDS()) - startDate) / 86400000) + 1;
+  const startLabel = startDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
   el.innerHTML = `
     <div class="dashboard-header">
       <div class="header-row">
         <div>
           <h1 class="app-title">Great North Run</h1>
           <p class="app-subtitle">13 September 2026</p>
+          <p class="app-training-since">Training since ${startLabel} &mdash; Day ${dayNum}</p>
         </div>
         <button class="icon-btn" onclick="openSettings()">&#9881;</button>
       </div>

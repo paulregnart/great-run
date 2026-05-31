@@ -659,6 +659,13 @@ h1, h2, h3, h4 { line-height: 1.25; }
   color: var(--text-muted);
 }
 
+.app-training-since {
+  font-size: 12px;
+  color: var(--red);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
 .countdown-card {
   background: var(--navy);
   border-color: var(--navy);
