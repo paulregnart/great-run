@@ -22,7 +22,7 @@ const KEYS = {
 // ================================================================
 
 const GOOD_HABITS = [
-  { id: 'noGluten',     label: 'No gluten',            type: 'daily',    important: true,  icon: '\u{1F33E}', note: 'Most important' },
+  { id: 'noGluten',     label: 'No gluten',            type: 'daily',    important: true,  icon: '\u{1F33E}' },
   { id: 'noAlcohol',    label: 'No alcohol',            type: 'daily',    important: false, icon: '❌' },
   { id: 'lowCarb',      label: 'Low-carb day',          type: 'daily',    important: false, icon: '\u{1F957}' },
   { id: 'steps10k',     label: '10,000 steps',          type: 'daily',    important: false, icon: '\u{1F45F}' },
