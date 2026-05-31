@@ -11,7 +11,6 @@ const PEAK_DISTANCE = 11.5;
 const NS = 'gnr_';
 
 const KEYS = {
-  PIN:    NS + 'pin',
   SETUP:  NS + 'setup',
   LOGS:   NS + 'logs',
   FREEZE: NS + 'freeze',
@@ -98,81 +97,6 @@ function addDays(ds, n) {
 }
 
 function monthDays(year, month) { return new Date(year, month + 1, 0).getDate(); }
-
-// ================================================================
-// PIN MANAGEMENT
-// ================================================================
-
-async function hashPIN(pin) {
-  const enc = new TextEncoder();
-  const data = enc.encode('gnr_v1_salt_' + pin);
-  const buf = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-async function saveNewPIN(pin) {
-  Store.set(KEYS.PIN, await hashPIN(pin));
-}
-
-async function checkPIN(pin) {
-  const stored = Store.get(KEYS.PIN);
-  if (!stored) return false;
-  return (await hashPIN(pin)) === stored;
-}
-
-function hasPIN() { return Store.get(KEYS.PIN) !== null; }
-
-// ================================================================
-// PIN PAD UI
-// ================================================================
-
-const pinState = { buffers: { setup: [], confirm: [], entry: [] } };
-
-function buildPinPad(containerId, onComplete, mode) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  el.innerHTML = '';
-  const keys = ['1','2','3','4','5','6','7','8','9','','0','del'];
-  keys.forEach(k => {
-    const btn = document.createElement('button');
-    btn.className = 'pin-key' + (k === '' ? ' empty' : k === 'del' ? ' del' : '');
-    btn.textContent = k === 'del' ? '⌫' : k;
-    if (k !== '') {
-      btn.ontouchstart = () => btn.classList.add('tapped');
-      btn.ontouchend = () => { btn.classList.remove('tapped'); pinKeyPress(k, mode, onComplete); };
-      btn.onclick = () => pinKeyPress(k, mode, onComplete);
-    }
-    el.appendChild(btn);
-  });
-}
-
-function updatePinDots(dotsId, len) {
-  const dots = document.getElementById(dotsId);
-  if (!dots) return;
-  dots.querySelectorAll('.dot').forEach((d, i) => {
-    d.classList.toggle('filled', i < len);
-  });
-}
-
-function pinKeyPress(key, mode, onComplete) {
-  const buf = pinState.buffers[mode];
-
-  if (key === 'del') {
-    buf.pop();
-  } else if (buf.length < 4) {
-    buf.push(key);
-  }
-
-  const dotsIdMap = { setup: 'pin-dots-setup', confirm: 'pin-dots-confirm', entry: 'pin-dots-entry' };
-  updatePinDots(dotsIdMap[mode], buf.length);
-
-  if (buf.length === 4) {
-    const pin = buf.join('');
-    pinState.buffers[mode] = [];
-    updatePinDots(dotsIdMap[mode], 0);
-    onComplete(pin);
-  }
-}
 
 // ================================================================
 // TRAINING PLAN GENERATOR
@@ -1435,7 +1359,7 @@ function saveSettings() {
 // ================================================================
 
 function confirmResetAll() {
-  const ok = confirm('This will erase ALL data: logs, PIN, settings, streaks. Are you sure?');
+  const ok = confirm('This will erase ALL data: logs, settings, streaks. Are you sure?');
   if (!ok) return;
   const ok2 = confirm('Last chance. Reset everything and start fresh?');
   if (!ok2) return;
@@ -1533,58 +1457,6 @@ function initDaySelector(selectorId) {
 }
 
 // ================================================================
-// PIN FLOW
-// ================================================================
-
-function initPinSetup() {
-  document.getElementById('pin-setup-section').classList.remove('hidden');
-  document.getElementById('pin-confirm-section').classList.add('hidden');
-  document.getElementById('pin-entry-section').classList.add('hidden');
-  let firstPin = '';
-
-  buildPinPad('pin-pad-setup', (pin) => {
-    firstPin = pin;
-    document.getElementById('pin-setup-section').classList.add('hidden');
-    document.getElementById('pin-confirm-section').classList.remove('hidden');
-    buildPinPad('pin-pad-confirm', async (confirm) => {
-      if (confirm !== firstPin) {
-        document.getElementById('pin-confirm-section').classList.add('hidden');
-        document.getElementById('pin-setup-section').classList.remove('hidden');
-        firstPin = '';
-        buildPinPad('pin-pad-setup', () => {}, 'setup');
-        showToast('PINs did not match. Try again.');
-        return;
-      }
-      await saveNewPIN(pin);
-      // After PIN set, show onboarding or app
-      document.getElementById('pin-screen').classList.add('hidden');
-      if (!Store.get(KEYS.SETUP)) {
-        document.getElementById('onboard-screen').classList.remove('hidden');
-      } else {
-        launchApp();
-      }
-    }, 'confirm');
-  }, 'setup');
-}
-
-function initPinEntry() {
-  document.getElementById('pin-setup-section').classList.add('hidden');
-  document.getElementById('pin-confirm-section').classList.add('hidden');
-  document.getElementById('pin-entry-section').classList.remove('hidden');
-
-  buildPinPad('pin-pad-entry', async (pin) => {
-    const ok = await checkPIN(pin);
-    if (ok) {
-      document.getElementById('pin-screen').classList.add('hidden');
-      launchApp();
-    } else {
-      document.getElementById('pin-error').classList.remove('hidden');
-      setTimeout(() => document.getElementById('pin-error').classList.add('hidden'), 1500);
-    }
-  }, 'entry');
-}
-
-// ================================================================
 // LAUNCH APP
 // ================================================================
 
@@ -1603,9 +1475,9 @@ function launchApp() {
 document.addEventListener('DOMContentLoaded', () => {
   initDaySelector('ob-days-selector');
 
-  if (!hasPIN()) {
-    initPinSetup();
+  if (!Store.get(KEYS.SETUP)) {
+    document.getElementById('onboard-screen').classList.remove('hidden');
   } else {
-    initPinEntry();
+    launchApp();
   }
 });

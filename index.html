@@ -14,47 +14,6 @@
 </head>
 <body>
 
-<!-- ========== PIN SCREEN ========== -->
-<div id="pin-screen" class="overlay-screen">
-  <div class="pin-container">
-    <div class="pin-logo">
-      <div class="pin-logo-mark">GNR</div>
-      <h1>Great North Run</h1>
-      <p class="pin-race-date">13 September 2026</p>
-    </div>
-
-    <div id="pin-setup-section">
-      <h2>Set your PIN</h2>
-      <p class="pin-desc">Choose a 4-digit PIN to lock your data.<br>
-        <span class="pin-warning">This is a casual lock, not real security.</span>
-      </p>
-      <div class="pin-dots" id="pin-dots-setup">
-        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-      </div>
-      <div class="pin-pad" id="pin-pad-setup"></div>
-    </div>
-
-    <div id="pin-confirm-section" class="hidden">
-      <h2>Confirm PIN</h2>
-      <p class="pin-desc">Enter your PIN again to confirm.</p>
-      <div class="pin-dots" id="pin-dots-confirm">
-        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-      </div>
-      <div class="pin-pad" id="pin-pad-confirm"></div>
-    </div>
-
-    <div id="pin-entry-section" class="hidden">
-      <h2>Welcome back</h2>
-      <div class="pin-dots" id="pin-dots-entry">
-        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-      </div>
-      <div id="pin-error" class="pin-error hidden">Incorrect PIN. Try again.</div>
-      <div class="pin-pad" id="pin-pad-entry"></div>
-      <button class="text-btn danger-text" onclick="confirmResetAll()">Reset everything</button>
-    </div>
-  </div>
-</div>
-
 <!-- ========== ONBOARDING SCREEN ========== -->
 <div id="onboard-screen" class="overlay-screen hidden">
   <div class="onboard-container">
@@ -218,7 +177,7 @@
       <button class="btn-primary full-width" onclick="saveSettings()">Save changes</button>
       <div class="settings-divider"></div>
       <button class="btn-danger full-width" onclick="confirmResetAll()">Reset everything</button>
-      <p class="hint center">This will erase all data and PIN.</p>
+      <p class="hint center">This will erase all data.</p>
     </div>
   </div>
 </div>

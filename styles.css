@@ -61,7 +61,7 @@ input { font-family: inherit; }
 h1, h2, h3, h4 { line-height: 1.25; }
 
 /* ================================================================
-   OVERLAY SCREENS (PIN + ONBOARDING)
+   OVERLAY SCREENS (ONBOARDING)
    ================================================================ */
 
 .overlay-screen {
@@ -77,135 +77,6 @@ h1, h2, h3, h4 { line-height: 1.25; }
 }
 
 .overlay-screen.hidden { display: none; }
-
-/* PIN SCREEN */
-.pin-container {
-  width: 100%;
-  max-width: 340px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-}
-
-.pin-logo {
-  text-align: center;
-  color: white;
-}
-
-.pin-logo-mark {
-  display: inline-block;
-  background: var(--red);
-  color: white;
-  font-size: 28px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  padding: 8px 20px;
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
-
-.pin-logo h1 {
-  font-size: 22px;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 4px;
-}
-
-.pin-race-date {
-  color: rgba(255,255,255,0.6);
-  font-size: 14px;
-}
-
-#pin-setup-section,
-#pin-confirm-section,
-#pin-entry-section {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-
-#pin-setup-section h2,
-#pin-confirm-section h2,
-#pin-entry-section h2 {
-  color: white;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.pin-desc {
-  color: rgba(255,255,255,0.7);
-  font-size: 14px;
-  text-align: center;
-  line-height: 1.5;
-}
-
-.pin-warning {
-  font-size: 12px;
-  color: rgba(255,255,255,0.45);
-}
-
-.pin-dots {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-}
-
-.dot {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.5);
-  background: transparent;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.dot.filled {
-  background: var(--red);
-  border-color: var(--red);
-}
-
-.pin-pad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  width: 100%;
-  max-width: 280px;
-}
-
-.pin-key {
-  background: rgba(255,255,255,0.1);
-  color: white;
-  font-size: 22px;
-  font-weight: 600;
-  border-radius: var(--radius-sm);
-  padding: 18px 0;
-  text-align: center;
-  transition: background 0.1s;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.pin-key:active, .pin-key.tapped { background: rgba(255,255,255,0.25); }
-
-.pin-key.del { font-size: 18px; }
-.pin-key.empty { background: transparent; border-color: transparent; pointer-events: none; }
-
-.pin-error {
-  color: #ff6b6b;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.text-btn {
-  color: rgba(255,255,255,0.5);
-  font-size: 14px;
-  padding: 8px;
-  text-decoration: underline;
-}
-
-.danger-text { color: #ff6b6b; }
 
 /* ONBOARDING */
 .onboard-container {
