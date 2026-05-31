@@ -260,6 +260,24 @@ function getLongRunPB() {
   return pb;
 }
 
+function getTotalBikeMiles() {
+  let total = 0;
+  const logs = Store.getLogs();
+  for (const log of Object.values(logs)) {
+    if (log.bikeDistance) total += log.bikeDistance;
+  }
+  return Math.round(total * 10) / 10;
+}
+
+function getTotalSwimHours() {
+  let total = 0;
+  const logs = Store.getLogs();
+  for (const log of Object.values(logs)) {
+    if (log.swimHours) total += log.swimHours;
+  }
+  return Math.round(total * 100) / 100;
+}
+
 // ================================================================
 // STREAKS
 // ================================================================
@@ -754,6 +772,50 @@ function renderToday(ds) {
     </div>
 
     <div class="card">
+      <div class="section-title">Cross training</div>
+
+      <div class="habit-row" onclick="toggleHabit('swim')">
+        <div class="habit-icon ${log.habits?.swim ? 'checked' : ''}">\u{1F3CA}</div>
+        <div class="habit-text">
+          <div class="habit-label">Swim</div>
+        </div>
+        <div class="habit-check ${log.habits?.swim ? 'checked' : ''}">${log.habits?.swim ? '&#10003;' : ''}</div>
+      </div>
+
+      ${log.habits?.swim ? `
+      <div class="long-run-log">
+        <label>Duration (hours):</label>
+        <div class="long-run-input-row">
+          <input type="number" class="long-run-input" id="swim-hours-input"
+            value="${log.swimHours || ''}" min="0.1" max="10" step="0.25"
+            onchange="saveSwimHours(this.value)"
+            onblur="saveSwimHours(this.value)">
+          <span class="input-unit dark">hrs</span>
+        </div>
+      </div>` : ''}
+
+      <div class="habit-row" onclick="toggleHabit('bike')">
+        <div class="habit-icon ${log.habits?.bike ? 'checked' : ''}">\u{1F6B4}</div>
+        <div class="habit-text">
+          <div class="habit-label">Bike ride</div>
+        </div>
+        <div class="habit-check ${log.habits?.bike ? 'checked' : ''}">${log.habits?.bike ? '&#10003;' : ''}</div>
+      </div>
+
+      ${log.habits?.bike ? `
+      <div class="long-run-log">
+        <label>Distance (miles):</label>
+        <div class="long-run-input-row">
+          <input type="number" class="long-run-input" id="bike-dist-input"
+            value="${log.bikeDistance || ''}" min="0.1" max="200" step="0.1"
+            onchange="saveBikeDistance(this.value)"
+            onblur="saveBikeDistance(this.value)">
+          <span class="input-unit dark">mi</span>
+        </div>
+      </div>` : ''}
+    </div>
+
+    <div class="card">
       <div class="section-title">Bad habits &mdash; flag if they happened</div>
       ${BAD_HABITS.map(h => badHabitRow(h, !!log.bad?.[h.id])).join('')}
     </div>
@@ -784,6 +846,8 @@ function toggleHabit(id) {
   log.habits[id] = !log.habits[id];
   if (id === 'longRun' && !log.habits[id]) log.longRunDistance = null;
   if (id === 'shortRun' && !log.habits[id]) log.shortRunDistance = null;
+  if (id === 'bike' && !log.habits[id]) log.bikeDistance = null;
+  if (id === 'swim' && !log.habits[id]) log.swimHours = null;
   saveLog(checkinDateDS, log);
   renderToday(checkinDateDS);
 }
@@ -809,6 +873,22 @@ function saveShortRunDistance(val) {
   if (isNaN(n) || n <= 0) return;
   const log = getOrCreateLog(checkinDateDS);
   log.shortRunDistance = Math.round(n * 10) / 10;
+  saveLog(checkinDateDS, log);
+}
+
+function saveBikeDistance(val) {
+  const n = parseFloat(val);
+  if (isNaN(n) || n <= 0) return;
+  const log = getOrCreateLog(checkinDateDS);
+  log.bikeDistance = Math.round(n * 10) / 10;
+  saveLog(checkinDateDS, log);
+}
+
+function saveSwimHours(val) {
+  const n = parseFloat(val);
+  if (isNaN(n) || n <= 0) return;
+  const log = getOrCreateLog(checkinDateDS);
+  log.swimHours = Math.round(n * 100) / 100;
   saveLog(checkinDateDS, log);
 }
 
@@ -1085,6 +1165,8 @@ function renderStats() {
   const weeklyGood = GOOD_HABITS.filter(h => h.type === 'weekly' || h.type === 'optional');
   const totalMiles = getTotalLoggedMiles();
   const pb = getLongRunPB();
+  const totalBikeMiles = getTotalBikeMiles();
+  const totalSwimHours = getTotalSwimHours();
 
   let html = `
     <div class="stats-header">
@@ -1105,6 +1187,18 @@ function renderStats() {
         <div class="stats-miles-stat">
           <div class="stats-miles-num">${pb}</div>
           <div class="stats-miles-label">longest run (PB)</div>
+        </div>` : ''}
+        ${totalBikeMiles > 0 ? `
+        <div class="stats-miles-divider"></div>
+        <div class="stats-miles-stat">
+          <div class="stats-miles-num">${totalBikeMiles}</div>
+          <div class="stats-miles-label">miles biked</div>
+        </div>` : ''}
+        ${totalSwimHours > 0 ? `
+        <div class="stats-miles-divider"></div>
+        <div class="stats-miles-stat">
+          <div class="stats-miles-num">${totalSwimHours}</div>
+          <div class="stats-miles-label">hours swum</div>
         </div>` : ''}
       </div>
     </div>
