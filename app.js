@@ -33,11 +33,6 @@ const GOOD_HABITS = [
   { id: 'fuelPractice', label: 'Race fuel practice',    type: 'optional', important: false, icon: '⚡', note: 'On long runs' },
 ];
 
-const BAD_HABITS = [
-  { id: 'processedFood', label: 'Ultra-processed food',   icon: '\u{1F35F}' },
-  { id: 'skippedRun',    label: 'Skipped a planned run',  icon: '\u{1F625}' },
-  { id: 'earlyCoffee',   label: 'Coffee before 10am',     icon: '☕'    },
-];
 
 // ================================================================
 // STORAGE
@@ -257,6 +252,36 @@ function getTotalSwimHours() {
     if (log.swimHours) total += log.swimHours;
   }
   return Math.round(total * 100) / 100;
+}
+
+function getTotalHikeMiles() {
+  let total = 0;
+  const logs = Store.getLogs();
+  for (const log of Object.values(logs)) {
+    if (log.hikeDistance) total += log.hikeDistance;
+  }
+  return Math.round(total * 10) / 10;
+}
+
+function getTotalAllMiles() {
+  let total = 0;
+  const logs = Store.getLogs();
+  for (const log of Object.values(logs)) {
+    if (log.longRunDistance) total += log.longRunDistance;
+    if (log.shortRunDistance) total += log.shortRunDistance;
+    if (log.bikeDistance) total += log.bikeDistance;
+    if (log.hikeDistance) total += log.hikeDistance;
+  }
+  return Math.round(total * 10) / 10;
+}
+
+function getTotalGymSessions() {
+  let count = 0;
+  const logs = Store.getLogs();
+  for (const log of Object.values(logs)) {
+    if (log.habits?.gymSession) count++;
+  }
+  return count;
 }
 
 // ================================================================
@@ -643,17 +668,6 @@ function renderToday(ds) {
       </div>`;
   }
 
-  function badHabitRow(h, checked) {
-    return `
-      <div class="habit-row" onclick="toggleBad('${h.id}')">
-        <div class="habit-icon ${checked ? 'bad-checked' : ''}">${h.icon}</div>
-        <div class="habit-text">
-          <div class="habit-label">${h.label}</div>
-        </div>
-        <div class="habit-check ${checked ? 'bad-checked' : ''}">${checked ? '&#10003;' : ''}</div>
-      </div>`;
-  }
-
   function pips(count, target) {
     let s = '<div class="progress-pips">';
     for (let i = 0; i < target; i++) s += `<div class="pip ${i < count ? 'done' : ''}"></div>`;
@@ -794,11 +808,26 @@ function renderToday(ds) {
           <span class="input-unit dark">mi</span>
         </div>
       </div>` : ''}
-    </div>
 
-    <div class="card">
-      <div class="section-title">Bad habits &mdash; flag if they happened</div>
-      ${BAD_HABITS.map(h => badHabitRow(h, !!log.bad?.[h.id])).join('')}
+      <div class="habit-row" onclick="toggleHabit('hike')">
+        <div class="habit-icon ${log.habits?.hike ? 'checked' : ''}">\u{1F97E}</div>
+        <div class="habit-text">
+          <div class="habit-label">Hiking</div>
+        </div>
+        <div class="habit-check ${log.habits?.hike ? 'checked' : ''}">${log.habits?.hike ? '&#10003;' : ''}</div>
+      </div>
+
+      ${log.habits?.hike ? `
+      <div class="long-run-log">
+        <label>Distance (miles):</label>
+        <div class="long-run-input-row">
+          <input type="number" class="long-run-input" id="hike-dist-input"
+            value="${log.hikeDistance || ''}" min="0.1" max="100" step="0.1"
+            onchange="saveHikeDistance(this.value)"
+            onblur="saveHikeDistance(this.value)">
+          <span class="input-unit dark">mi</span>
+        </div>
+      </div>` : ''}
     </div>
 
     ${!log.checkinComplete ? `
@@ -829,14 +858,7 @@ function toggleHabit(id) {
   if (id === 'shortRun' && !log.habits[id]) log.shortRunDistance = null;
   if (id === 'bike' && !log.habits[id]) log.bikeDistance = null;
   if (id === 'swim' && !log.habits[id]) log.swimHours = null;
-  saveLog(checkinDateDS, log);
-  renderToday(checkinDateDS);
-}
-
-function toggleBad(id) {
-  const log = getOrCreateLog(checkinDateDS);
-  if (!log.bad) log.bad = {};
-  log.bad[id] = !log.bad[id];
+  if (id === 'hike' && !log.habits[id]) log.hikeDistance = null;
   saveLog(checkinDateDS, log);
   renderToday(checkinDateDS);
 }
@@ -870,6 +892,14 @@ function saveSwimHours(val) {
   if (isNaN(n) || n <= 0) return;
   const log = getOrCreateLog(checkinDateDS);
   log.swimHours = Math.round(n * 100) / 100;
+  saveLog(checkinDateDS, log);
+}
+
+function saveHikeDistance(val) {
+  const n = parseFloat(val);
+  if (isNaN(n) || n <= 0) return;
+  const log = getOrCreateLog(checkinDateDS);
+  log.hikeDistance = Math.round(n * 10) / 10;
   saveLog(checkinDateDS, log);
 }
 
@@ -1132,17 +1162,28 @@ function renderStats() {
       </div>`;
   }
 
+  const statsStartDS = '2026-06-01';
+  const statsStartD = parseDS(statsStartDS);
+  const todayD = new Date(); todayD.setHours(0,0,0,0);
+  const daysSinceStart = Math.max(0, Math.floor((todayD - statsStartD) / 86400000)) + 1;
+
   const dailyGood = GOOD_HABITS.filter(h => h.type === 'daily');
   const weeklyGood = GOOD_HABITS.filter(h => h.type === 'weekly' || h.type === 'optional');
-  const totalMiles = getTotalLoggedMiles();
+  const totalAllMiles = getTotalAllMiles();
+  const totalRunMiles = getTotalLoggedMiles();
   const pb = getLongRunPB();
   const totalBikeMiles = getTotalBikeMiles();
   const totalSwimHours = getTotalSwimHours();
+  const totalHikeMiles = getTotalHikeMiles();
+  const totalGymSessions = getTotalGymSessions();
 
   let html = `
     <div class="stats-header">
       <div class="header-row">
-        <h1 class="app-title">Stats</h1>
+        <div>
+          <h1 class="app-title">Stats since June 1st</h1>
+          <p class="app-subtitle">${daysSinceStart} day${daysSinceStart === 1 ? '' : 's'} of training</p>
+        </div>
       </div>
     </div>
 
@@ -1150,8 +1191,13 @@ function renderStats() {
       <div class="section-title" style="margin-bottom:12px">Training miles</div>
       <div class="stats-miles-row">
         <div class="stats-miles-stat">
-          <div class="stats-miles-num">${totalMiles}</div>
+          <div class="stats-miles-num">${totalAllMiles}</div>
           <div class="stats-miles-label">total miles logged</div>
+        </div>
+        <div class="stats-miles-divider"></div>
+        <div class="stats-miles-stat">
+          <div class="stats-miles-num">${totalRunMiles}</div>
+          <div class="stats-miles-label">total miles ran</div>
         </div>
         ${pb > 0 ? `
         <div class="stats-miles-divider"></div>
@@ -1171,6 +1217,18 @@ function renderStats() {
           <div class="stats-miles-num">${totalSwimHours}</div>
           <div class="stats-miles-label">hours swum</div>
         </div>` : ''}
+        ${totalGymSessions > 0 ? `
+        <div class="stats-miles-divider"></div>
+        <div class="stats-miles-stat">
+          <div class="stats-miles-num">${totalGymSessions}</div>
+          <div class="stats-miles-label">gym sessions</div>
+        </div>` : ''}
+        ${totalHikeMiles > 0 ? `
+        <div class="stats-miles-divider"></div>
+        <div class="stats-miles-stat">
+          <div class="stats-miles-num">${totalHikeMiles}</div>
+          <div class="stats-miles-label">miles hiked</div>
+        </div>` : ''}
       </div>
     </div>
 
@@ -1182,11 +1240,6 @@ function renderStats() {
     <div class="card">
       <div class="section-title" style="margin-bottom:8px">Weekly habits</div>
       ${weeklyGood.map(h => statRow(h, calcHabitStreak(h.id, false), calcHitRate(h.id, false), false)).join('')}
-    </div>
-
-    <div class="card">
-      <div class="section-title" style="margin-bottom:8px">Bad habits (clean = avoided)</div>
-      ${BAD_HABITS.map(h => statRow(h, calcHabitStreak(h.id, true), calcHitRate(h.id, true), true)).join('')}
     </div>
 
     <div class="card">
@@ -1236,8 +1289,6 @@ function renderRecapContent() {
   let gymCount = 0;
   let glutenDays = 0;
   let noAlcDays = 0;
-  const badCounts = {};
-  BAD_HABITS.forEach(h => { badCounts[h.id] = 0; });
 
   for (let i = 0; i < 7; i++) {
     const ds = addDays(weekMon, i);
@@ -1249,7 +1300,6 @@ function renderRecapContent() {
     if (log.habits?.gymSession) gymCount++;
     if (log.habits?.noGluten) glutenDays++;
     if (log.habits?.noAlcohol) noAlcDays++;
-    BAD_HABITS.forEach(h => { if (log.bad?.[h.id]) badCounts[h.id]++; });
   }
 
   const pb = getLongRunPB();
@@ -1293,20 +1343,6 @@ function renderRecapContent() {
         <div class="recap-stat-label">Alcohol-free days</div>
         <div class="recap-stat-val">${noAlcDays}<span class="recap-stat-unit">/7</span></div>
       </div>
-    </div>
-
-    <div class="recap-bad-list">
-      <div class="section-title" style="margin-bottom:8px">Bad habits this week</div>
-      ${BAD_HABITS.map(h => {
-        const count = badCounts[h.id];
-        return `
-          <div class="recap-bad-item">
-            <span>${h.icon}</span>
-            ${count === 0
-              ? `<span class="recap-bad-clean">&#10003; Clean on ${h.label.toLowerCase()}</span>`
-              : `<span class="recap-bad-count">${count}x</span> <span class="recap-bad-label">${h.label.toLowerCase()}</span>`}
-          </div>`;
-      }).join('')}
     </div>
 
     <div class="recap-stat" style="margin-bottom:16px">
