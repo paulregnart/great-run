@@ -193,6 +193,17 @@
   </div>
 </div>
 
+<!-- Miles ran drill-down modal -->
+<div id="milesran-modal" class="modal-overlay hidden" onclick="closeMilesRan(event)">
+  <div class="modal-card wide" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Miles Ran</h2>
+      <button onclick="closeMilesRan()" class="icon-btn">&#10005;</button>
+    </div>
+    <div class="modal-body" id="milesran-content"></div>
+  </div>
+</div>
+
 <!-- Freeze notification -->
 <div id="freeze-toast" class="toast hidden">
   <span class="toast-icon">&#10052;</span>

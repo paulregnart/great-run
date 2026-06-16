@@ -1194,9 +1194,9 @@ function renderStats() {
           <div class="stats-miles-num">${totalAllMiles}</div>
           <div class="stats-miles-label">total miles logged</div>
         </div>
-        <div class="stats-miles-stat">
+        <div class="stats-miles-stat clickable" onclick="openMilesRan()">
           <div class="stats-miles-num">${totalRunMiles}</div>
-          <div class="stats-miles-label">total miles ran</div>
+          <div class="stats-miles-label">total miles ran &rsaquo;</div>
         </div>
         ${pb > 0 ? `
         <div class="stats-miles-stat">
@@ -1352,6 +1352,53 @@ function renderRecapContent() {
     </div>` : ''}
 
     <button class="btn-secondary full-width" onclick="closeRecap()">Close</button>
+  `;
+}
+
+// ================================================================
+// MILES RAN DRILL-DOWN
+// ================================================================
+
+function openMilesRan() {
+  const modal = document.getElementById('milesran-modal');
+  if (!modal) return;
+  renderMilesRanContent();
+  modal.classList.remove('hidden');
+}
+
+function closeMilesRan(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('milesran-modal').classList.add('hidden');
+}
+
+function renderMilesRanContent() {
+  const el = document.getElementById('milesran-content');
+  if (!el) return;
+
+  const logs = Store.getLogs();
+  const entries = [];
+  for (const [ds, log] of Object.entries(logs)) {
+    if (log.longRunDistance) entries.push({ ds, distance: log.longRunDistance, type: 'Long run' });
+    if (log.shortRunDistance) entries.push({ ds, distance: log.shortRunDistance, type: 'Short run' });
+  }
+  entries.sort((a, b) => b.ds.localeCompare(a.ds));
+
+  const total = Math.round(entries.reduce((sum, e) => sum + e.distance, 0) * 10) / 10;
+
+  if (entries.length === 0) {
+    el.innerHTML = '<p class="milesran-empty">No runs logged yet.</p>';
+    return;
+  }
+
+  el.innerHTML = `
+    <p class="milesran-summary">${total} miles across ${entries.length} run${entries.length === 1 ? '' : 's'}</p>
+    <div class="milesran-list">
+      ${entries.map(e => `
+        <div class="milesran-row">
+          <div class="milesran-date">${fmtDate(e.ds, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}<span class="milesran-type">${e.type}</span></div>
+          <div class="milesran-dist">${e.distance} mi</div>
+        </div>`).join('')}
+    </div>
   `;
 }
 
