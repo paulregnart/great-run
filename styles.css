@@ -1100,35 +1100,30 @@ h1, h2, h3, h4 { line-height: 1.25; }
   padding-top: calc(var(--safe-top) + 8px);
 }
 
-.stats-miles-row {
-  display: flex;
-  align-items: center;
-  gap: 0;
+.stats-miles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 24px;
+  column-gap: 8px;
 }
 
 .stats-miles-stat {
-  flex: 1;
   text-align: center;
+  padding: 4px 0;
 }
 
 .stats-miles-num {
-  font-size: 36px;
+  font-size: 26px;
   font-weight: 700;
   color: #fff;
-  line-height: 1;
+  line-height: 1.1;
 }
 
 .stats-miles-label {
-  font-size: 12px;
+  font-size: 11.5px;
   color: rgba(255,255,255,0.6);
-  margin-top: 4px;
-}
-
-.stats-miles-divider {
-  width: 1px;
-  height: 48px;
-  background: rgba(255,255,255,0.2);
-  flex-shrink: 0;
+  margin-top: 6px;
+  line-height: 1.3;
 }
 
 .stats-section-title {

@@ -1188,43 +1188,37 @@ function renderStats() {
     </div>
 
     <div class="card card-navy">
-      <div class="section-title" style="margin-bottom:12px">Training miles</div>
-      <div class="stats-miles-row">
+      <div class="section-title" style="margin-bottom:16px">Training miles</div>
+      <div class="stats-miles-grid">
         <div class="stats-miles-stat">
           <div class="stats-miles-num">${totalAllMiles}</div>
           <div class="stats-miles-label">total miles logged</div>
         </div>
-        <div class="stats-miles-divider"></div>
         <div class="stats-miles-stat">
           <div class="stats-miles-num">${totalRunMiles}</div>
           <div class="stats-miles-label">total miles ran</div>
         </div>
         ${pb > 0 ? `
-        <div class="stats-miles-divider"></div>
         <div class="stats-miles-stat">
           <div class="stats-miles-num">${pb}</div>
           <div class="stats-miles-label">longest run (PB)</div>
         </div>` : ''}
         ${totalBikeMiles > 0 ? `
-        <div class="stats-miles-divider"></div>
         <div class="stats-miles-stat">
           <div class="stats-miles-num">${totalBikeMiles}</div>
           <div class="stats-miles-label">miles biked</div>
         </div>` : ''}
         ${totalSwimHours > 0 ? `
-        <div class="stats-miles-divider"></div>
         <div class="stats-miles-stat">
           <div class="stats-miles-num">${totalSwimHours}</div>
           <div class="stats-miles-label">hours swum</div>
         </div>` : ''}
         ${totalGymSessions > 0 ? `
-        <div class="stats-miles-divider"></div>
         <div class="stats-miles-stat">
           <div class="stats-miles-num">${totalGymSessions}</div>
           <div class="stats-miles-label">gym sessions</div>
         </div>` : ''}
         ${totalHikeMiles > 0 ? `
-        <div class="stats-miles-divider"></div>
         <div class="stats-miles-stat">
           <div class="stats-miles-num">${totalHikeMiles}</div>
           <div class="stats-miles-label">miles hiked</div>
