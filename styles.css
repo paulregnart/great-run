@@ -1056,6 +1056,13 @@ h1, h2, h3, h4 { line-height: 1.25; }
   font-weight: 600;
 }
 
+.route-progress-sub {
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+  font-size: 12.5px;
+  margin-top: 2px;
+}
+
 .progress-bar-wrapper {
   background: rgba(255,255,255,0.15);
   border-radius: 20px;

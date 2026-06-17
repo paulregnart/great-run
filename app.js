@@ -994,22 +994,18 @@ function renderPlan() {
 function renderRoute() {
   const el = document.getElementById('route-content');
   if (!el) return;
-  const setup = Store.get(KEYS.SETUP);
-
-  const totalDays = daysUntilRace() + 1;
-  const setup_start = setup ? parseDS(setup.startDate) : new Date();
-  const race = new Date(RACE_DATE);
-  setup_start.setHours(0,0,0,0);
-  race.setHours(0,0,0,0);
-  const totalPlanDays = Math.max(1, Math.round((race - setup_start) / 86400000));
-  const daysPassed = Math.max(0, totalPlanDays - daysUntilRace());
-  const timePct = Math.min(1, daysPassed / totalPlanDays);
 
   const totalLogged = getTotalLoggedMiles();
-  const ROUTE_MILES = 13.1;
-  const milePct = Math.min(1, totalLogged / (ROUTE_MILES * 10)); // over 10x the race = "done"
-  const progress = Math.min(1, timePct * 0.6 + milePct * 0.4);
-  const pctDisplay = Math.round(progress * 100);
+  const totalRatio = totalLogged / GNR_DISTANCE; // e.g. 26 miles / 13.1 = 1.98 routes run
+  const pctDisplay = Math.round(totalRatio * 100); // can exceed 100%
+
+  let lapsCompleted = Math.floor(totalRatio);
+  let progress = totalRatio - lapsCompleted; // current lap position, 0-1
+  if (progress === 0 && lapsCompleted > 0) {
+    // Sitting exactly on a multiple of the route distance: show the lap as finished, not reset to the start
+    progress = 1;
+    lapsCompleted -= 1;
+  }
 
   // Landmarks roughly at % of path: start=0, Tyne Bridge=30%, South Shields=100%
   const tyneBridgePct = 0.30;
@@ -1085,10 +1081,15 @@ function renderRoute() {
       </div>
 
       <div class="route-progress-label">
-        ${pctDisplay}% of the journey
+        ${pctDisplay}% of the route run in training
+      </div>
+      <div class="route-progress-sub">
+        ${lapsCompleted > 0
+          ? `&#127942; Run the full route ${lapsCompleted} time${lapsCompleted === 1 ? '' : 's'}`
+          : 'Keep going to complete your first full route'}
       </div>
       <div class="progress-bar-wrapper">
-        <div class="progress-bar-fill" style="width: ${pctDisplay}%"></div>
+        <div class="progress-bar-fill" style="width: ${Math.round(progress * 100)}%"></div>
       </div>
 
       <div class="route-landmarks">
